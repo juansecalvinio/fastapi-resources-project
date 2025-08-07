@@ -7,7 +7,8 @@ from resources.infrastructure.repositories import ResourceModel, SQLModelResourc
 
 class TestSQLModelResourceRepository:
   @pytest.fixture(autouse=True)
-  def cleanup_database(self):
+  def setup_and_cleanup_database(self):
+    SQLModel.metadata.create_all(engine)
     yield
     SQLModel.metadata.drop_all(engine)
 
@@ -20,3 +21,13 @@ class TestSQLModelResourceRepository:
       statement = select(ResourceModel)
       resource = session.exec(statement).first()
       resource.url = "http://google.com"
+
+  def test_return_all_resources(self) -> None:
+    with Session(engine) as session:
+      session.add(ResourceModel(url="http://google.com"))
+      session.commit()
+
+    resources = SQLModelResourceRepository().all()
+
+    assert len(resources) == 1
+    assert resources[0].url() == ResourceUrl(value="http://google.com")
