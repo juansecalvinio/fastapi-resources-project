@@ -1,6 +1,7 @@
-from sqlmodel import Field, SQLModel, Session, create_engine
+from sqlmodel import Field, SQLModel, Session, create_engine, select
 from resources.domain.models import Resource
 from resources.domain.repositories import ResourcesRepository
+from resources.domain.value_objects import ResourceUrl
 
 class ResourceModel(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -12,7 +13,12 @@ SQLModel.metadata.create_all(engine)
 
 class SQLModelResourceRepository(ResourcesRepository):
   def all(self) -> list[Resource]:
-    pass
+    with Session(engine) as session:
+      resource_models = session.exec(select(ResourceModel)).all()
+    return [
+       Resource(ResourceUrl(value=resource_model.url))
+       for resource_model in resource_models
+    ]
 
   def save(self, resource: Resource) -> None:
     resource_model = ResourceModel(url=resource.url().value)
