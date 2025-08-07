@@ -2,6 +2,9 @@
 fastapi==0.116.1
 validators==0.35.0
 
+# Database
+sqlmodel==0.0.24
+
 # Testing
 httpx==0.28.1
 pytest==8.4.1
