@@ -1,0 +1,2 @@
+class UrlIsNotValid(Exception):
+  pass
